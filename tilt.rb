@@ -108,5 +108,31 @@ class Game
   end
 end
   
-game = Game.new()
-game.play_game()
+class Tilt
+
+  def prompt_menu()
+    printf "TILT v0.1\n"
+    printf "\n"
+    printf "  1. Play a game\n"
+    printf "  2. Print Overall Statistics\n"
+    printf "  3. Print Personal Statistics\n"
+    printf "  4. Quit\n"
+    printf "\n"
+    printf "Please make a choice: "
+    
+    choice = gets.to_i
+    
+    case choice
+    when 1
+      game = Game.new()
+      game.play_game()
+    when 4
+      exit
+    else
+      prompt_menu()
+    end
+  end
+end
+
+tilt = Tilt.new()
+tilt.prompt_menu()
