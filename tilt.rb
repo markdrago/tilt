@@ -120,9 +120,10 @@ class Stats
   end
 
   def produce_overall_high_scores()
-    highscores = @db.execute("select player_name, total_score from game order by total_score desc limit 10")
-    highscores.each { |highscore|
-      printf "#{highscore[0]} -- #{highscore[1]}\n"
+    num = 1
+    @db.execute("select player_name, total_score from game order by total_score desc limit 10") { |highscore|
+      printf "#{num}. #{highscore[0]} -- #{highscore[1]}\n"
+      num = num + 1
     }
   end
 end
