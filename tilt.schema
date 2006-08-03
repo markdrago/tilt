@@ -6,7 +6,8 @@ dts);
 CREATE TABLE game (
 game_id integer primary key,
 session_id,
-player_name);
+player_name,
+total_score);
 CREATE TABLE round (
 round_id integer primary key,
 game_id,

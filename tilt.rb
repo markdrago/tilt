@@ -95,7 +95,8 @@ class Game
     session_id = db.last_insert_row_id()
 
     @players.each { |player|
-      db.execute("insert into game values (NULL, #{session_id}, '#{player.name}')")
+      total_score = player.get_total_score()
+      db.execute("insert into game values (NULL, #{session_id}, '#{player.name}', #{total_score})")
       game_id = db.last_insert_row_id()
 
       round_num = 1
@@ -108,6 +109,24 @@ class Game
   end
 end
   
+class Stats
+
+  def initialize()
+    @db = SQLite3::Database.new("tilt.db")    
+  end
+
+  def produce_overall_stats()
+    produce_overall_high_scores()
+  end
+
+  def produce_overall_high_scores()
+    highscores = @db.execute("select player_name, total_score from game order by total_score desc limit 10")
+    highscores.each { |highscore|
+      printf "#{highscore[0]} -- #{highscore[1]}\n"
+    }
+  end
+end
+
 class Tilt
 
   def prompt_menu()
@@ -126,11 +145,16 @@ class Tilt
     when 1
       game = Game.new()
       game.play_game()
+    when 2
+      stats = Stats.new()
+      stats.produce_overall_high_scores()
     when 4
       exit
-    else
-      prompt_menu()
     end
+
+    printf "\n\n\n";
+    prompt_menu()
+
   end
 end
 
