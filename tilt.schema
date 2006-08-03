@@ -1,0 +1,15 @@
+BEGIN TRANSACTION;
+CREATE TABLE session (
+session_id integer primary key,
+num_players,
+dts);
+CREATE TABLE game (
+game_id integer primary key,
+session_id,
+player_name);
+CREATE TABLE round (
+round_id integer primary key,
+game_id,
+round_number,
+score);
+COMMIT;
