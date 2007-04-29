@@ -117,6 +117,15 @@ class Stats
 
   def produce_overall_stats()
     produce_overall_high_scores()
+    produce_overall_avg_scores()
+    produce_overall_low_scores()
+  end
+
+  def produce_individual_stats()
+    player_name = get_player_name()
+    produce_individual_high_scores(player_name)
+    produce_individual_average_score(player_name)
+    produce_individual_low_scores(player_name)
   end
 
   def produce_overall_high_scores()
@@ -127,18 +136,79 @@ class Stats
       num = num + 1
     }
   end
+
+  def produce_overall_avg_scores()
+    num = 1
+    printf "\nHigh Averages:\n"
+    @db.execute("select player_name, avg(total_score) from game group by player_name order by avg(total_score) desc") { |avgscore|
+      printf "#{num}. #{avgscore[0]} -- #{avgscore[1]}\n"
+      num = num + 1
+    }
+  end
+
+  def produce_overall_low_scores()
+    num = 1
+    printf "\nLow Scores:\n"
+    @db.execute("select player_name, total_score from game order by total_score asc limit 5") { |lowscore|
+      printf "#{num}. #{lowscore[0]} -- #{lowscore[1]}\n"
+      num = num + 1
+    }
+  end
+
+  def get_player_name()
+    players = []
+    printf "\n\nChoose Player:\n"
+    @db.execute("select distinct player_name from game order by player_name") { |name|
+      players.push(name[0])
+    }
+
+    players.each_index { |i|
+      printf "#{i+1}. #{players[i]}\n"
+    }
+
+    printf "\nEnter Player Number: "
+    playernum_str = gets
+    playernum = playernum_str.strip!.to_i - 1
+
+    return players[playernum]
+  end
+
+  def produce_individual_high_scores(player_name)
+    printf "\n\n#{player_name}'s High Scores:\n"
+    num = 1
+    @db.execute("select total_score from game where player_name='#{player_name}' order by total_score desc limit 10") { |highscore|
+      printf "#{num}. #{highscore[0]}\n"
+      num = num + 1
+    }
+  end
+
+  def produce_individual_average_score(player_name)
+    printf "\n#{player_name}'s Average Score: "
+    @db.execute("select avg(total_score) from game where player_name='#{player_name}'") { |avgscore|
+      avg = avgscore[0].to_i
+      printf "#{avg}\n"
+    }
+  end
+
+  def produce_individual_low_scores(player_name)
+    printf "\n#{player_name}'s Low Scores:\n"
+    num = 1
+    @db.execute("select total_score from game where player_name='#{player_name}' order by total_score asc limit 5") { |lowscore|
+      printf "#{num}. #{lowscore[0]}\n"
+      num = num + 1
+    }
+  end
 end
 
 class Tilt
 
   def prompt_menu()
+    printf "________________________________\n"
     printf "TILT v0.1\n"
-    printf "\n"
     printf "  1. Play a game\n"
     printf "  2. Print Overall Statistics\n"
     printf "  3. Print Personal Statistics\n"
     printf "  4. Quit\n"
-    printf "\n"
     printf "Please make a choice: "
     
     choice = gets.to_i
@@ -149,12 +219,15 @@ class Tilt
       game.play_game()
     when 2
       stats = Stats.new()
-      stats.produce_overall_high_scores()
+      stats.produce_overall_stats()
+    when 3
+      stats = Stats.new()
+      stats.produce_individual_stats()
     when 4
       exit
     end
 
-    printf "\n\n\n";
+    printf "\n";
     prompt_menu()
 
   end
