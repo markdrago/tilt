@@ -90,6 +90,11 @@ class Game
   end
 
   def store_scores_in_db()
+    if @num_players <= 0
+      print "No players entered, not saving game in database.\n\n"
+      return
+    end
+
     db = SQLite3::Database.new("tilt.db")
     db.execute("insert into session values (NULL, #{@num_players}, datetime('now'))")
     session_id = db.last_insert_row_id()
@@ -140,16 +145,22 @@ class Stats
   def produce_overall_avg_scores()
     num = 1
     printf "\nHigh Averages:\n"
-    @db.execute("select player_name, avg(total_score) from game group by player_name order by avg(total_score) desc") { |avgscore|
-      printf "#{num}. #{avgscore[0]} -- #{avgscore[1]}\n"
+    @db.execute("select player_name, avg(total_score), count(game_id) from game group by player_name order by avg(total_score) desc") { |avgscore|
+      score = avgscore[1].to_i
+      printf "#{num}. #{avgscore[0]} -- #{score} (#{avgscore[2]})\n"
       num = num + 1
     }
   end
 
   def produce_overall_low_scores()
-    num = 1
+    lowscores = []
     printf "\nLow Scores:\n"
     @db.execute("select player_name, total_score from game order by total_score asc limit 5") { |lowscore|
+      lowscores << lowscore
+    }
+
+    num = 1
+    lowscores.each { |lowscore|
       printf "#{num}. #{lowscore[0]} -- #{lowscore[1]}\n"
       num = num + 1
     }
